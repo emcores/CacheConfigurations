@@ -23,11 +23,11 @@ function build_gem5_x86(build_root)
     all_text = read(filename,String)
     open(filename, "w") do f
         write(f, replace(all_text,
-            "'-Wno-unused-parameter'",
+            "'-Wno-unused-parameter'" =>
             "'-Wno-unused-parameter','-Wno-unused-variable'"))
      end
     # build gem5 using scons
-    run(`scons build/X86/gem5.opt build/X86/gem5.fast -j$(Sys.CPU_THREADS)`)
+    @time run(`scons build/X86/gem5.opt build/X86/gem5.fast -j$(Sys.CPU_THREADS)`)
     cd(cwd)
 end
 
