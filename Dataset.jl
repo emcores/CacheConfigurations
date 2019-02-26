@@ -47,8 +47,8 @@ function build_gem5_x86(build_root)
     @time run(`scons build/X86/gem5.opt build/X86/gem5.fast -j$(Sys.CPU_THREADS)`)
     gem5b = Gem5Build(
         build_root,
-        joinpath(build_root,"gem5","build","X86","gem5opt"),
-        joinpath(build_root,"gem5","build","X86","gem5fast"),
+        joinpath(build_root,"gem5","build","X86","gem5.opt"),
+        joinpath(build_root,"gem5","build","X86","gem5.fast"),
         joinpath(build_root,"gem5","configs","example","se.py")
     )
     cd(cwd)
