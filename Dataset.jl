@@ -56,7 +56,7 @@ function build_gem5_x86(build_root)
 end
 
 function exec_gem5opt_command(gem5b::Gem5Build,
-    cacheconfig::CacheConfig, outdir::String, exec::String, options::String)
+    cacheconfig::CacheConfig, outdir::String, exec::String, options::String, maxinsts=0)
 
     c = cacheconfig
     command = `$(gem5b.gem5opt) --outdir=$outdir
@@ -64,7 +64,10 @@ function exec_gem5opt_command(gem5b::Gem5Build,
         --l1d_size $(c.l1d_size) --l1i_size $(c.l1i_size)
         --l1d_assoc $(c.l1d_assoc) --l1i_assoc $(c.l1i_assoc)
         --cacheline_size $(c.cacheline_size)
-        --caches`
+        --caches --cpu-type TimingSimpleCPU`
+    if maxinsts > 0
+        command = `$command --maxinsts 100000`
+    end
     run(command)
 end
 

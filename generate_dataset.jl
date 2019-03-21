@@ -8,5 +8,4 @@ gem5b = Dataset.build_gem5_x86(root)
 Dataset.exec_gem5opt_command(
     gem5b, Dataset.base_cacheconfig, joinpath(root,"gem5out"),
     joinpath(root,"gem5","tests","test-progs","hello","bin","x86","linux","hello"),
-    ""
-)
+    "", 0)
