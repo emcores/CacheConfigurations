@@ -1,6 +1,6 @@
 FROM ubuntu:xenial
 RUN apt-get update \
-    &&  apt-get install -y gettext wget git automake build-essential scons python-dev libprotobuf-dev python-protobuf protobuf-compiler libgoogle-perftools-dev
+    &&  apt-get install -y gettext wget git automake libtool build-essential scons python-dev libprotobuf-dev python-protobuf protobuf-compiler libgoogle-perftools-dev
 
 # From https://github.com/jupyter/docker-stacks/blob/master/datascience-notebook/Dockerfile (Aug 13, 2019)
 # Julia dependencies
