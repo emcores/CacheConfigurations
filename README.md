@@ -3,7 +3,7 @@
 ## Docker
 
 ```
-docker build --tag=ubuntu_gem5_julia .
+docker build --tag=ubuntu_gem5_julia dockerbuild/
 ```
 
 ```
