@@ -33,12 +33,9 @@ function clone_gem5(build_root)
 end
 
 function build_gem5_x86(build_root)
-    gem5opt = joinpath(build_root,"gem5","build","X86","gem5.opt")
-    gem5fast = joinpath(build_root,"gem5","build","X86","gem5.fast")
-    gem5scriptse = joinpath(build_root,"gem5","configs","example","se.py")
-    if ispath(gem5opt) && ispath(gem5fast) && ispath(gem5scriptse)
-        println("gem5 build exists, skipping")
-        gem5b = Gem5Build(build_root, gem5opt, gem5fast, gem5scriptse)
+    gem5b = get_gem5build(build_root)
+    if verify_gem5build(gem5b)
+        println("gem5 build exists, returning")
     else
         cwd = pwd()
         cd(build_root)
@@ -55,15 +52,24 @@ function build_gem5_x86(build_root)
          end
         # build gem5 using scons
         @time run(`scons build/X86/gem5.opt build/X86/gem5.fast -j$(Sys.CPU_THREADS)`)
-        gem5b = Gem5Build(
-            build_root,
-            gem5opt,
-            gem5fast,
-            gem5scriptse
-        )
         cd(cwd)
     end
     return gem5b
+end
+
+@inline function get_gem5build(build_root)
+    gem5opt = joinpath(build_root,"gem5","build","X86","gem5.opt")
+    gem5fast = joinpath(build_root,"gem5","build","X86","gem5.fast")
+    gem5scriptse = joinpath(build_root,"gem5","configs","example","se.py")
+    return Gem5Build(build_root, gem5opt, gem5fast, gem5scriptse)
+end
+
+@inline function verify_gem5build(gem5b::Gem5Build)
+    if ispath(gem5b.gem5opt) && ispath(gem5b.gem5fast) && ispath(gem5b.se_script)
+        return true
+    else
+        return false
+    end
 end
 
 function clone_mibench(build_root)
