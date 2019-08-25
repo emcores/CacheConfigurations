@@ -17,6 +17,10 @@ struct Gem5Build
     se_script::String
 end
 
+struct MiBenchBuild
+    build_root::String
+end
+
 function clone_gem5(build_root)
     cwd = pwd()
     cd(build_root)
@@ -29,30 +33,67 @@ function clone_gem5(build_root)
 end
 
 function build_gem5_x86(build_root)
+    gem5opt = joinpath(build_root,"gem5","build","X86","gem5.opt")
+    gem5fast = joinpath(build_root,"gem5","build","X86","gem5.fast")
+    gem5scriptse = joinpath(build_root,"gem5","configs","example","se.py")
+    if ispath(gem5opt) && ispath(gem5fast) && ispath(gem5scriptse)
+        println("gem5 build exists, skipping")
+        gem5b = Gem5Build(build_root, gem5opt, gem5fast, gem5scriptse)
+    else
+        cwd = pwd()
+        cd(build_root)
+        cd("gem5")
+        run(`git checkout bcf6983bc605b884fba52ec74634bddfd395cd5e`)
+        # patch gem5 SConstruct to allow building gem5.fast
+        filename = "SConstruct"
+        run(`git checkout $filename`)
+        all_text = read(filename,String)
+        open(filename, "w") do f
+            write(f, replace(all_text,
+                "'-Wno-unused-parameter'" =>
+                "'-Wno-unused-parameter','-Wno-unused-variable'"))
+         end
+        # build gem5 using scons
+        @time run(`scons build/X86/gem5.opt build/X86/gem5.fast -j$(Sys.CPU_THREADS)`)
+        gem5b = Gem5Build(
+            build_root,
+            gem5opt,
+            gem5fast,
+            gem5scriptse
+        )
+        cd(cwd)
+    end
+    return gem5b
+end
+
+function clone_mibench(build_root)
+    cwd = pwd()
+    cd(build_root)
+    if isdir("mibench")
+        println("mibench directory exists, skipping")
+    else
+        run(`git clone https://github.com/emcores/MiBench.git`)
+    end
+    cd(cwd)
+end
+
+function build_mibench_x86(build_root)
     cwd = pwd()
     cd(build_root)
 
-    cd("gem5")
-    run(`git checkout bcf6983bc605b884fba52ec74634bddfd395cd5e`)
-    # patch gem5 SConstruct to allow building gem5.fast
-    filename = "SConstruct"
-    run(`git checkout $filename`)
-    all_text = read(filename,String)
-    open(filename, "w") do f
-        write(f, replace(all_text,
-            "'-Wno-unused-parameter'" =>
-            "'-Wno-unused-parameter','-Wno-unused-variable'"))
-     end
-    # build gem5 using scons
-    @time run(`scons build/X86/gem5.opt build/X86/gem5.fast -j$(Sys.CPU_THREADS)`)
-    gem5b = Gem5Build(
-        build_root,
-        joinpath(build_root,"gem5","build","X86","gem5.opt"),
-        joinpath(build_root,"gem5","build","X86","gem5.fast"),
-        joinpath(build_root,"gem5","configs","example","se.py")
+    cd("MiBench")
+    # build MiBench using defaults
+    println(pwd())
+    juliaexe = Base.julia_exename()
+    buildscript = "build.jl"
+    cmd = `$juliaexe $buildscript`
+    println(cmd)
+    @time run(cmd)
+    mibenchb = MiBenchBuild(
+        build_root
     )
     cd(cwd)
-    return gem5b
+    return mibenchb
 end
 
 function exec_gem5opt_command(gem5b::Gem5Build,
