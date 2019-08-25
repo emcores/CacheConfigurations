@@ -103,7 +103,7 @@ function build_mibench_x86(build_root)
 end
 
 function exec_gem5opt_command(gem5b::Gem5Build,
-    cacheconfig::CacheConfig, outdir::String, exec::String, options::String, maxinsts=0)
+    cacheconfig::CacheConfig, outdir::String, exec::String, options::String, maxinsts::Int64=0)
 
     c = cacheconfig
     command = `$(gem5b.gem5opt) --outdir=$outdir
@@ -113,7 +113,7 @@ function exec_gem5opt_command(gem5b::Gem5Build,
         --cacheline_size $(c.cacheline_size)
         --caches --cpu-type TimingSimpleCPU`
     if maxinsts > 0
-        command = `$command --maxinsts 100000`
+        command = `$command --maxinsts $maxinsts`
     end
     run(command)
 end
