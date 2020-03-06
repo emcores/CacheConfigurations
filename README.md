@@ -13,5 +13,6 @@ docker run -v $(pwd):/data -it ubuntu_gem5_julia bash
 This mounts the current working directory under /data. Then,
 
 ```
+cd /data/
 julia generate_dataset.jl
 ```
